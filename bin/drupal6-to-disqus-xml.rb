@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require 'sequel'
 require 'mysql2'
 require 'yaml'
@@ -8,7 +9,7 @@ config = YAML.load_file File.join(File.dirname(__FILE__), '../config')
 # Prepare comments database
 db = Sequel.connect(:adapter=>'mysql2', :host=>config['host'], :port=>config['port'], :database=>config['database'], :user=>config['user'], :password=>config['password'])
 comments = db[:comments]
-comments_query = comments.select(:nid, :timestamp, :cid, :name, :mail, :homepage, :hostname, :comment).qualify_to(:comments).select_append(:title, :created).qualify_to(:node).filter(:status => 0).qualify_to(:comments).join(:node, :nid => :nid).order(:nid.asc).qualify_to(:comments)
+comments_query = comments.select(:nid, :timestamp, :cid, :name, :mail, :homepage, :hostname, :comment).qualify_to(:comments).select_append(:title, :created).qualify_to(:node).filter(:status => 0).qualify_to(:comments).join(:node, :nid => :nid).order(:nid.asc).qualify_to(:comments).select_append(:bricolage_template).qualify_to(:bricolage).qualify_to(:comments).join(:bricolage, :nid => :nid).order(:nid.asc).qualify_to(:comments)
 
 $file_counter = 0
 $last_nid = 0
