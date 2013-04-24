@@ -172,6 +172,21 @@ def add_comment(comment)
   #this does not work
   #comment_body.force_encoding("ISO-8859-1").encode("UTF-8") 
   
+  #truncate comment lenght to 25000 characters. this is supposedly the limit though i can't seem to find docs on  this. mostly to just stop error reports.
+  comment_body = comment_body.slice(0, 25000)
+
+  comment_subject = comment[:subject]
+  # interpolatie comment subject(if one exists) into body and wrap in some html. disqus does not support comment titles, this preservers what was  in drupal..
+  if comment_subject != ''
+     comment_body = "<p><b>#{comment_subject}</b></p> #{comment_body}"
+  end
+
+  # debug
+  #comment_id = comment[:cid]
+  #comment_ip = comment[:hostname]
+  #comment_author = comment[:name]
+  #puts "#{comment_body.size} #{comment_id} #{comment_ip} #{comment_author} #{comment_body}"
+
   string = String.new
   xml = Builder::XmlMarkup.new(:target => string)
 
