@@ -67,7 +67,19 @@ def add_comment(comment)
   # get rid of some unwanted content in the body 
   comment_body = comment[:comment]
  
-  comment_body.gsub!(/\[\/?(?:b|u|i|s|B|U|I|S|quote|QUOTE|url|URL|email|EMAIL)(?:=[^\]\s]+)?\]/, '')
+  comment_body.gsub!(/\[\/?(?:url|URL|email|EMAIL|img|IMG)(?:=[^\]\s]+)?\]/, '')
+  
+  #replace bbcode tags with disqus allowed html tags.
+  comment_body.gsub!(/\[(?i)B\]/, '<b>')
+  comment_body.gsub!(/\[(?i)U\]/, '<u>')
+  comment_body.gsub!(/\[(?i)I\]/, '<i>')
+  comment_body.gsub!(/\[(?i)S\]/, '<s>')
+  comment_body.gsub!(/\[(?i)QUOTE\]/, '<q>')
+  comment_body.gsub!(/\[\/(?i)B\]/, '</b>')
+  comment_body.gsub!(/\[\/(?i)U\]/, '</u>')
+  comment_body.gsub!(/\[\/(?i)I\]/, '</i>')
+  comment_body.gsub!(/\[\/(?i)S\]/, '</s>')
+  comment_body.gsub!(/\[\/(?i)QUOTE\]/, '</q>')
  
   #remove embeded youtube
   comment_body.gsub!(/\[youtube\].*?\[\/youtube\]/, '')
