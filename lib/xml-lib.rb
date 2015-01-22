@@ -65,7 +65,7 @@ def add_comment(comment)
   comment_body = comment[:comment]
 
   comment_body.delete!("\C-M") 
-  comment_body.delete!("</p><p><br></p>") 
+  comment_body.delete!("<p><br></p>") 
 
   comment_body = comment_body.slice(0, 24950)
 
