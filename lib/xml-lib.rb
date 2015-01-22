@@ -40,15 +40,12 @@ def open_thread(comment)
   post_date_gmt = Time.at(comment[:created]).utc.to_s
   post_date_gmt.slice! " UTC"
   
-  comment_url = comment[:bricolage_template]
-  comment_url.gsub!(/index.html/, '')
-
   string = <<-XML
 <item>
   <title>#{comment[:title]}</title>
-  <link>http://dev.thetyee.anarres.ca/#{comment_url}</link>
+  <link>http://rabble.ca/node/#{comment[:nid]}</link>
   <content:encoded><![CDATA[#{comment[:title]}]]></content:encoded>
-  <dsq:thread_identifier>#{comment[:bricolage_template]}</dsq:thread_identifier>
+  <dsq:thread_identifier>node/#{comment[:nid]}</dsq:thread_identifier>
   <wp:post_date_gmt>#{post_date_gmt}</wp:post_date_gmt>
   <wp:comment_status>open</wp:comment_status>
 XML
@@ -66,126 +63,12 @@ def add_comment(comment)
  
   # get rid of some unwanted content in the body 
   comment_body = comment[:comment]
- 
-  comment_body.gsub!(/\[\/?(?:url|URL|email|EMAIL|img|IMG)(?:=[^\]\s]+)?\]/, '')
-  
-  #replace bbcode tags with disqus allowed html tags.
-  comment_body.gsub!(/\[(?i)B\]/, '<b>')
-  comment_body.gsub!(/\[(?i)U\]/, '<u>')
-  comment_body.gsub!(/\[(?i)I\]/, '<i>')
-  comment_body.gsub!(/\[(?i)S\]/, '<s>')
-  comment_body.gsub!(/\[(?i)QUOTE\]/, '<q>')
-  comment_body.gsub!(/\[\/(?i)B\]/, '</b>')
-  comment_body.gsub!(/\[\/(?i)U\]/, '</u>')
-  comment_body.gsub!(/\[\/(?i)I\]/, '</i>')
-  comment_body.gsub!(/\[\/(?i)S\]/, '</s>')
-  comment_body.gsub!(/\[\/(?i)QUOTE\]/, '</q>')
- 
-  #remove embeded youtube
-  comment_body.gsub!(/\[youtube\].*?\[\/youtube\]/, '')
-   
-  #remove evernything within [img] ... [/img] bbcode... clarify
-  #comment_body.gsub!(/\[img\].*?\[\/img\]/, '')
-  #comment_body.gsub!(/\[IMG\].*?\[\/IMG\]/, '')
-  
-  #remove <ctrl>M
+
   comment_body.delete!("\C-M") 
+  comment_body.delete!("</p><p><br></p>") 
 
-  #fix Latin-1 UTF-8 encoding issues. an old export of content/databse/cms has Latin-1
-  #encoded caracters, newer content is all UTF-8, they are mixed. this mess below
-  #is the only thing i coud get to work...
-
-  comment_body.gsub!(/â€”/, '-')
-  comment_body.gsub!(/â€“/, '-')
-  comment_body.gsub!(/â€¦/, '…')
-  comment_body.gsub!(/â€™/, '’')
-  comment_body.gsub!(/â€˜/, '‘')
-  comment_body.gsub!(/â€œ/, '“')
-  comment_body.gsub!(/â€¢/, '•')
-  comment_body.gsub!(/â„¢/, '™')
-  comment_body.gsub!(/â€[[:cntrl:]]/, '”')
-  comment_body.gsub!(/â€/, '†')
-  comment_body.gsub!(/â‚¬/, '€')
-
-  comment_body.gsub!(/Ã©/, 'é')
-  comment_body.gsub!(/Ãª/, 'ê')
-  comment_body.gsub!(/Ã¨/, 'è')
-  comment_body.gsub!(/Ã§/, 'ç')
-  comment_body.gsub!(/Ã¸/, 'ø')
-  comment_body.gsub!(/Ã¼¸/, 'ü')
-  comment_body.gsub!(/Ã±¸/, 'ñ')
-  comment_body.gsub!(/Ã¡/, 'á')
-  comment_body.gsub!(/Ã¯/, 'ï')
-  comment_body.gsub!(/Ãˆ/, 'ï')
-  comment_body.gsub!(/Ã˜/, 'Ø')
-  comment_body.gsub!(/Ã‰/, 'É')
-  comment_body.gsub!(/Ã…/, '…')
-  comment_body.gsub!(/Ã‹/, 'Ë')
-  comment_body.gsub!(/ÃŒ/, 'Ì')
-  comment_body.gsub!(/Ã¶/, 'ö')
-  comment_body.gsub!(/Ã‡/, 'Ç')
-  comment_body.gsub!(/Ã¤/, 'ä')
-  comment_body.gsub!(/Ã³/, 'ó')
-  comment_body.gsub!(/Ã¼/, 'ü')
-  comment_body.gsub!(/Ã‚/, 'Â')
-  comment_body.gsub!(/Ã£/, 'ã')
-  comment_body.gsub!(/Ã«/, 'ë')
-  comment_body.gsub!(/Ãº/, 'ú')
-  comment_body.gsub!(/Ã©/, 'é')
-  comment_body.gsub!(/Ã¬/, 'ì')
-  comment_body.gsub!(/Â¢/, '¢')
-  comment_body.gsub!(/Ã¥/, 'å')
-  comment_body.gsub!(/Ã‘/, 'Ñ')
- 
-  comment_body.gsub!(/Â©/, '©')
-  comment_body.gsub!(/Â®/, '®')
-  comment_body.gsub!(/Â½/, '½')
-  comment_body.gsub!(/Â¾/, '¾')
-  comment_body.gsub!(/Â¼/, '¼')
-  comment_body.gsub!(/Â±/, '±')
-  comment_body.gsub!(/Â³/, '³')
-  comment_body.gsub!(/Â²/, '²')
-  comment_body.gsub!(/Â¹/, '¹')
-  comment_body.gsub!(/Â´/, '´')
-  comment_body.gsub!(/Â¯/, '¯')
-  comment_body.gsub!(/Â°/, '°')
-  comment_body.gsub!(/Âª/, 'ª')
-  comment_body.gsub!(/Â»/, '»')
-  comment_body.gsub!(/Â«/, '«')
-  comment_body.gsub!(/Â·/, '·')
-  comment_body.gsub!(/Â¿/, '¿')
-  comment_body.gsub!(/Â¶/, '¶')
-  comment_body.gsub!(/Â£/, '£')
-  comment_body.gsub!(/Ã¢/, 'â')
-  comment_body.gsub!(/Â¡/, '¡')
-  comment_body.gsub!(/Â­/, '')
-  comment_body.gsub!(/Â¦/, '¦')
-  comment_body.gsub!(/Â¨/, '¨')
-  comment_body.gsub!(/Â¸/, '¸')
-  comment_body.gsub!(/Â¤/, '¤')
-  comment_body.gsub!(/Âµ/, 'µ')
-  comment_body.gsub!(/Â§/, '§')
-  comment_body.gsub!(/Â\*/, '')
-  comment_body.gsub!(/Â/, '')
-  comment_body.gsub!(/D\`ME/, 'D`ÂME')
- 
-  #this does not work
-  #comment_body.force_encoding("ISO-8859-1").encode("UTF-8") 
-  
-  #truncate comment lenght to 25000 characters. this is supposedly the limit though i can't seem to find docs on  this. mostly to just stop error reports.
   comment_body = comment_body.slice(0, 24950)
 
-  # debug
-  comment_id = comment[:cid]
-  comment_ip = comment[:hostname]
-  comment_author = comment[:name]
-  #puts "#{comment_body.size} #{comment_id} #{comment_ip} #{comment_author}"
-
-  comment_subject = comment[:subject]
-  # interpolatie comment subject(if one exists) into body and wrap in some html. disqus does not support comment titles, this preservers what was  in drupal..
-  if comment_subject != ''
-     comment_body = "<p><b>#{comment_subject}</b></p> #{comment_body}"
-  end
   string = String.new
   xml = Builder::XmlMarkup.new(:target => string)
 

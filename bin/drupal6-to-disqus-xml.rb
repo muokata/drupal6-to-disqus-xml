@@ -2,14 +2,15 @@
 require 'sequel'
 require 'mysql2'
 require 'yaml'
+require 'logger'
 require File.join(File.expand_path(File.dirname(__FILE__)), '../lib/xml-lib.rb')
 
 config = YAML.load_file File.join(File.dirname(__FILE__), '../config')
 
 # Prepare comments database
-db = Sequel.connect(:adapter=>'mysql2', :host=>config['host'], :port=>config['port'], :database=>config['database'], :user=>config['user'], :password=>config['password'])
+db = Sequel.connect(:adapter=>'mysql2', :host=>config['host'], :port=>config['port'], :database=>config['database'], :user=>config['user'], :password=>config['password'], :logger => Logger.new('log/db.log'))
 comments = db[:comments]
-comments_query = comments.select(:nid, :timestamp, :cid, :name, :mail, :homepage, :hostname, :subject, :comment).qualify_to(:comments).select_append(:title, :created).qualify_to(:node).filter(:status => 0).exclude(:comment => ['', '.', '?', '!', '$', '*', '-']).qualify_to(:comments).join(:node, :nid => :nid).order(:nid.asc).qualify_to(:comments).select_append(:bricolage_template).qualify_to(:bricolage).qualify_to(:comments).join(:bricolage, :nid => :nid).order(:nid.asc).qualify_to(:comments)
+comments_query = comments.select(:nid, :timestamp, :cid, :name, :mail, :homepage, :hostname, :comment).qualify(:comments).select_append(:title, :created, :type).qualify(:node).exclude(:type => ['forum', 'activist_toolkit']).qualify(:node).filter(:status => 0).qualify(:comments).join(:node, :nid => :nid).reverse(Sequel.desc(:nid)).qualify(:comments)
 
 $file_counter = 0
 $last_nid = 0
