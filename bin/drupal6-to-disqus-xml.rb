@@ -27,13 +27,13 @@ comments_query.each do |comment|
     add_comment(comment)
   end
 
-  if $last_nid != comment[:nid] && $file.size < 45000000
+  if $last_nid != comment[:nid] && $file.size < 11250000
     close_thread
     open_thread(comment)
     add_comment(comment)
   end
 
-  if $last_nid != comment[:nid] && $file.size > 45000000
+  if $last_nid != comment[:nid] && $file.size > 11250000
     close_file
     create_file
     open_thread(comment)
